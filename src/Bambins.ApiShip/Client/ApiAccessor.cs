@@ -2,10 +2,8 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -171,7 +169,7 @@ namespace Bambins.ApiShip.Client
 
             var credentials = _credentialsFactory?.Invoke();
             if (!string.IsNullOrEmpty(credentials?.AccessToken))
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", credentials.AccessToken);
+                request.Headers.Add("Authorization", credentials.AccessToken);
 
             foreach (var header in context.Headers)
                 request.Headers.Add(header.Key, header.Value);
