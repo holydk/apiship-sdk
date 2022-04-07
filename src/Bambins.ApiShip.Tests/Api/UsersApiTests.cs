@@ -46,29 +46,14 @@ namespace Bambins.ApiShip.Tests.Api
         }
 
         [Test]
-        public async Task LoginAsync_with_invalid_password_should_return_status_code_401()
-        {
-            try
-            {
-                await _subject.LoginAsync(new LoginRequest
-                {
-                    Login = _account.Login,
-                });
-            }
-            catch (ApiException e)
-            {
-                e.ErrorCode.Should().Be(400);
-            }
-        }
-
-        [Test]
-        public async Task LoginAsync_with_invalid_password_should_throw_api_exception()
+        public async Task LoginAsync_with_invalid_password_should_throw_api_exception_with_status_code_400()
         {
             Func<Task> getAccessToken = () => _subject.LoginAsync(new LoginRequest
             {
                 Login = _account.Login,
             });
-            await getAccessToken.Should().ThrowAsync<ApiException>();
+            var exceptionAssertion = await getAccessToken.Should().ThrowAsync<ApiException>();
+            exceptionAssertion.And.ErrorCode.Should().Be(400);
         }
     }
 }
