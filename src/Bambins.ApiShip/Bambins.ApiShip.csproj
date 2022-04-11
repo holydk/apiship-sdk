@@ -1,11 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+	<PackageId>Bambins.ApiShip</PackageId>
+	<Description>The C# client for interaction with the ApiShip endpoints.</Description>
+	<Version>0.1.0</Version>
+	<Authors>Dmitry Kiselev</Authors>
+	<PackageTags>aiship;apiship-client;apiship-csharp</PackageTags>
+	<PackageProjectUrl>https://github.com/holydk/apiship-sdk</PackageProjectUrl>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageReleaseNotes>https://github.com/holydk/apiship-sdk/releases</PackageReleaseNotes>
+	<RepositoryUrl>https://github.com/holydk/apiship-sdk</RepositoryUrl>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
-
 </Project>
