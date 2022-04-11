@@ -18,7 +18,7 @@ namespace Bambins.ApiShip.Client
     {
         #region Fields
 
-        private readonly Func<ApiShipCredentials> _credentialsFactory;
+        private readonly Func<string> _accessTokenFactory;
         private readonly Func<HttpClient> _httpClientFactory;
         private readonly bool _isSandbox;
 
@@ -57,13 +57,13 @@ namespace Bambins.ApiShip.Client
         /// </summary>
         /// <param name="relativePath">The API endpoint relative path.</param>
         /// <param name="isSandbox">The value indicating whether to enable the sandbox environment.</param>
-        /// <param name="credentialsFactory">The factory to create the credentials.</param>
+        /// <param name="accessTokenFactory">The factory to create the access token.</param>
         /// <param name="httpClientFactory">The factory to create the HTTP client.</param>
-        public ApiAccessor(string relativePath, bool isSandbox = false, Func<ApiShipCredentials> credentialsFactory = null, Func<HttpClient> httpClientFactory = null)
+        public ApiAccessor(string relativePath, bool isSandbox = false, Func<string> accessTokenFactory = null, Func<HttpClient> httpClientFactory = null)
         {
             Path = relativePath;
             _isSandbox = isSandbox;
-            _credentialsFactory = credentialsFactory;
+            _accessTokenFactory = accessTokenFactory;
             _httpClientFactory = httpClientFactory;
         }
 
@@ -167,9 +167,9 @@ namespace Bambins.ApiShip.Client
 
             var request = new HttpRequestMessage(context.Method, requestUri);
 
-            var credentials = _credentialsFactory?.Invoke();
-            if (!string.IsNullOrEmpty(credentials?.AccessToken))
-                request.Headers.Add("Authorization", credentials.AccessToken);
+            var accessToken = _accessTokenFactory?.Invoke();
+            if (!string.IsNullOrEmpty(accessToken))
+                request.Headers.Add("Authorization", accessToken);
 
             foreach (var header in context.Headers)
                 request.Headers.Add(header.Key, header.Value);

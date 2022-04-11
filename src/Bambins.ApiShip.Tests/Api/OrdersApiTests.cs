@@ -25,11 +25,7 @@ namespace Bambins.ApiShip.Tests.Api
                 Login = account.Login,
                 Password = account.Password,
             });
-            var credentials = new ApiShipCredentials
-            {
-                AccessToken = tokenResponse.Payload.Token
-            };
-            _subject = new OrdersApi(true, () => credentials, () => httpClient);
+            _subject = new OrdersApi(true, () => tokenResponse.Payload.Token, () => httpClient);
         }
 
         [Test]

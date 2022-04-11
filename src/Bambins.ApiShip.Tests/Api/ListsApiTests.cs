@@ -23,11 +23,7 @@ namespace Bambins.ApiShip.Tests.Api
                 Login = account.Login,
                 Password = account.Password,
             });
-            var credentials = new ApiShipCredentials
-            {
-                AccessToken = tokenResponse.Payload.Token
-            };
-            _subject = new ListsApi(true, () => credentials, () => httpClient);
+            _subject = new ListsApi(true, () => tokenResponse.Payload.Token, () => httpClient);
         }
 
         [Test]
