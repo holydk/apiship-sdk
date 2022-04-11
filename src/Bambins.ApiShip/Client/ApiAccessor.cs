@@ -18,10 +18,6 @@ namespace Bambins.ApiShip.Client
     {
         #region Fields
 
-        private readonly Func<string> _accessTokenFactory;
-        private readonly Func<HttpClient> _httpClientFactory;
-        private readonly bool _isSandbox;
-
         private JsonSerializerSettings _defaultReadSettings = new JsonSerializerSettings
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
@@ -41,10 +37,24 @@ namespace Bambins.ApiShip.Client
         #region Properties
 
         /// <summary>
+        /// Gets or sets the access token.
+        /// </summary>
+        internal string AccessToken { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="HttpClient"/>.
+        /// </summary>
+        internal HttpClient Client { get; set; }
+
+        /// <summary>
+        /// Gets the value indicating whether to enable the sandbox environment.
+        /// </summary>
+        internal bool IsSandbox { get; set; }
+
+        /// <summary>
         /// Gets the API endpoint relative path.
         /// </summary>
-        /// <value>The API endpoint relative path.</value>
-        protected string Path { get; }
+        internal string Path { get; }
 
         #endregion Properties
 
@@ -52,19 +62,19 @@ namespace Bambins.ApiShip.Client
 
         /// <summary>
         /// Creates a new instance of the <see cref="ApiAccessor" /> class
-        /// with the API endpoint relative path, the flag to enable the sandbox environment, the credentials factory
-        /// and the HTTP client factory.
+        /// with the API endpoint relative path, the flag to enable the sandbox environment,
+        /// the access token and the HTTP client.
         /// </summary>
         /// <param name="relativePath">The API endpoint relative path.</param>
         /// <param name="isSandbox">The value indicating whether to enable the sandbox environment.</param>
-        /// <param name="accessTokenFactory">The factory to create the access token.</param>
-        /// <param name="httpClientFactory">The factory to create the HTTP client.</param>
-        public ApiAccessor(string relativePath, bool isSandbox = false, Func<string> accessTokenFactory = null, Func<HttpClient> httpClientFactory = null)
+        /// <param name="accessToken">The access token.</param>
+        /// <param name="httpClient">The HTTP client.</param>
+        public ApiAccessor(string relativePath, bool isSandbox = false, string accessToken = null, HttpClient httpClient = null)
         {
             Path = relativePath;
-            _isSandbox = isSandbox;
-            _accessTokenFactory = accessTokenFactory;
-            _httpClientFactory = httpClientFactory;
+            IsSandbox = isSandbox;
+            AccessToken = accessToken;
+            Client = httpClient;
         }
 
         #endregion Ctor
@@ -167,9 +177,8 @@ namespace Bambins.ApiShip.Client
 
             var request = new HttpRequestMessage(context.Method, requestUri);
 
-            var accessToken = _accessTokenFactory?.Invoke();
-            if (!string.IsNullOrEmpty(accessToken))
-                request.Headers.Add("Authorization", accessToken);
+            if (!string.IsNullOrEmpty(AccessToken))
+                request.Headers.Add("Authorization", AccessToken);
 
             foreach (var header in context.Headers)
                 request.Headers.Add(header.Key, header.Value);
@@ -189,27 +198,26 @@ namespace Bambins.ApiShip.Client
                 request.Content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
             }
 
-            var client = _httpClientFactory?.Invoke();
-            if (client == null)
+            if (Client == null)
                 throw new ApiException(500, $"Cannot resolve the HTTP client.");
 
-            if (client.BaseAddress == null)
+            if (Client.BaseAddress == null)
             {
-                client.BaseAddress = _isSandbox
+                Client.BaseAddress = IsSandbox
                     ? new Uri(ApiDefaults.DEFAULT_SANDBOX_BASE_PATH)
                     : new Uri(ApiDefaults.DEFAULT_PROD_BASE_PATH);
             }
 
-            if (!client.DefaultRequestHeaders.Contains("UserAgent"))
+            if (!Client.DefaultRequestHeaders.Contains("UserAgent"))
                 request.Headers.Add("UserAgent", ApiDefaults.DEFAULT_USER_AGENT);
 
-            if (!client.DefaultRequestHeaders.Contains("Accept"))
+            if (!Client.DefaultRequestHeaders.Contains("Accept"))
                 request.Headers.Add("Accept", "*/*");
 
             HttpResponseMessage response;
             try
             {
-                response = await client.SendAsync(request);
+                response = await Client.SendAsync(request);
             }
             catch (Exception e)
             {

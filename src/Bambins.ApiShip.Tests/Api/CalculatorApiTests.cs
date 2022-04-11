@@ -19,13 +19,13 @@ namespace Bambins.ApiShip.Tests.Api
         {
             var httpClient = new HttpClient();
             var account = TestAccount.Create(true);
-            var usersApi = new UsersApi(true, null, () => httpClient);
+            var usersApi = new UsersApi(true, null, httpClient);
             var tokenResponse = await usersApi.LoginAsync(new LoginRequest
             {
                 Login = account.Login,
                 Password = account.Password,
             });
-            _subject = new CalculatorApi(true, () => tokenResponse.Payload.Token, () => httpClient);
+            _subject = new CalculatorApi(true, tokenResponse.Payload.Token, httpClient);
         }
 
         [Test]
@@ -91,7 +91,7 @@ namespace Bambins.ApiShip.Tests.Api
         [Test]
         public async Task CalculateAsync_without_access_token_throw_api_exception_with_status_code_401()
         {
-            var subject = new CalculatorApi(true, null, () => new HttpClient());
+            var subject = new CalculatorApi(true, null, new HttpClient());
             Func<Task> calculateTariffs = () => subject.CalculateAsync(new CalculatorRequest());
 
             var exceptionAssertion = await calculateTariffs.Should().ThrowAsync<ApiException>();

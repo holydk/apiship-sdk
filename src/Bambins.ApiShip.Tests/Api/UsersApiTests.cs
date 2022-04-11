@@ -18,7 +18,7 @@ namespace Bambins.ApiShip.Tests.Api
         public void Init()
         {
             _account = TestAccount.Create(true);
-            _subject = new UsersApi(true, null, () => new HttpClient());
+            _subject = new UsersApi(true, null, new HttpClient());
         }
 
         [Test]

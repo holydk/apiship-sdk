@@ -19,39 +19,41 @@ namespace Bambins.ApiShip.Tests.Api
         {
             var httpClient = new HttpClient();
             var account = TestAccount.Create(true);
-            var usersApi = new UsersApi(true, null, () => httpClient);
+            var usersApi = new UsersApi(true, null, httpClient);
             var tokenResponse = await usersApi.LoginAsync(new LoginRequest
             {
                 Login = account.Login,
                 Password = account.Password,
             });
-            _subject = new OrdersApi(true, () => tokenResponse.Payload.Token, () => httpClient);
+            _subject = new OrdersApi(true, tokenResponse.Payload.Token, httpClient);
         }
 
         [Test]
-        public async Task GetStatusAsync_with_id_should_throw_api_exception_with_status_code_404()
+        public async Task CancelAsync_should_return_status_code_200()
         {
-            Func<Task> getAccessToken = () => _subject.GetStatusAsync(1);
+            ApiResponse<CreateSyncOrderResponse> createOrderResponse = null;
+            try
+            {
+                createOrderResponse = await _subject.CreateSyncAsync(CreateTestOrder());
+            }
+            catch (ApiException)
+            {
+            }
 
-            var exceptionAssertion = await getAccessToken.Should().ThrowAsync<ApiException>();
-            exceptionAssertion.And.ErrorCode.Should().Be(404);
-        }
+            if (createOrderResponse is not null)
+            {
+                var getOrderResponse = await _subject.GetAsync(createOrderResponse.Payload.OrderId);
 
-        [Test]
-        public async Task GetStatusAsync_with_customer_number_should_throw_api_exception_with_status_code_404()
-        {
-            Func<Task> getAccessToken = () => _subject.GetStatusAsync("foo");
+                getOrderResponse.StatusCode.Should().Be(200);
 
-            var exceptionAssertion = await getAccessToken.Should().ThrowAsync<ApiException>();
-            exceptionAssertion.And.ErrorCode.Should().Be(404);
-        }
-
-        [Test]
-        public async Task GetStatusesAsync_should_return_status_code_200()
-        {
-            var response = await _subject.GetStatusesAsync(new OrderStatusesRequest { OrderIds = new[] { 1 } });
-
-            response.StatusCode.Should().Be(200);
+                try
+                {
+                    await _subject.DeleteAsync(createOrderResponse.Payload.OrderId);
+                }
+                catch (ApiException)
+                {
+                }
+            }
         }
 
         [Test]
@@ -85,31 +87,29 @@ namespace Bambins.ApiShip.Tests.Api
         }
 
         [Test]
-        public async Task CancelAsync_should_return_status_code_200()
+        public async Task GetStatusAsync_with_customer_number_should_throw_api_exception_with_status_code_404()
         {
-            ApiResponse<CreateSyncOrderResponse> createOrderResponse = null;
-            try
-            {
-                createOrderResponse = await _subject.CreateSyncAsync(CreateTestOrder());
-            }
-            catch (ApiException)
-            {
-            }
+            Func<Task> getAccessToken = () => _subject.GetStatusAsync("foo");
 
-            if (createOrderResponse is not null)
-            {
-                var getOrderResponse = await _subject.GetAsync(createOrderResponse.Payload.OrderId);
+            var exceptionAssertion = await getAccessToken.Should().ThrowAsync<ApiException>();
+            exceptionAssertion.And.ErrorCode.Should().Be(404);
+        }
 
-                getOrderResponse.StatusCode.Should().Be(200);
+        [Test]
+        public async Task GetStatusAsync_with_id_should_throw_api_exception_with_status_code_404()
+        {
+            Func<Task> getAccessToken = () => _subject.GetStatusAsync(1);
 
-                try
-                {
-                    await _subject.DeleteAsync(createOrderResponse.Payload.OrderId);
-                }
-                catch (ApiException)
-                {
-                }
-            }
+            var exceptionAssertion = await getAccessToken.Should().ThrowAsync<ApiException>();
+            exceptionAssertion.And.ErrorCode.Should().Be(404);
+        }
+
+        [Test]
+        public async Task GetStatusesAsync_should_return_status_code_200()
+        {
+            var response = await _subject.GetStatusesAsync(new OrderStatusesRequest { OrderIds = new[] { 1 } });
+
+            response.StatusCode.Should().Be(200);
         }
 
         [Test]
@@ -326,6 +326,6 @@ namespace Bambins.ApiShip.Tests.Api
             };
         }
 
-        #endregion
+        #endregion Utilities
     }
 }

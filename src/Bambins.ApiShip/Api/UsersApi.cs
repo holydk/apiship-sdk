@@ -15,13 +15,14 @@ namespace Bambins.ApiShip.Api
 
         /// <summary>
         /// Creates a new instance of the <see cref="UsersApi" /> class
-        /// with the flag to enable the sandbox environment, the credentials factory and the HTTP client factory.
+        /// with the flag to enable the sandbox environment,
+        /// the access token and the HTTP client.
         /// </summary>
         /// <param name="isSandbox">The value indicating whether to enable the sandbox environment.</param>
-        /// <param name="accessTokenFactory">The factory to create the access token.</param>
-        /// <param name="httpClientFactory">The factory to create the HTTP client.</param>
-        public UsersApi(bool isSandbox = false, Func<string> accessTokenFactory = null, Func<HttpClient> httpClientFactory = null)
-            : base(string.Empty, isSandbox, accessTokenFactory, httpClientFactory)
+        /// <param name="accessToken">The access token.</param>
+        /// <param name="httpClient">The HTTP client.</param>
+        public UsersApi(bool isSandbox = false, string accessToken = null, HttpClient httpClient = null)
+            : base(string.Empty, isSandbox, accessToken, httpClient)
         {
         }
 
