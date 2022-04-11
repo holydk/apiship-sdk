@@ -5,7 +5,7 @@ namespace Bambins.ApiShip.Models
     /// <summary>
     /// Represents a model containing the status data of the order.
     /// </summary>
-    public class OrderStatusData
+    public class OrderStatusData : OrderStatusDefinition
     {
         #region Properties
 
@@ -20,24 +20,9 @@ namespace Bambins.ApiShip.Models
         public string CreatedProvider { get; set; }
 
         /// <summary>
-        /// Gets or sets the status description.
-        /// </summary>
-        public string Description { get; set; }
-
-        /// <summary>
         /// Gets or sets the Error code. Example: 100 - error in ApiShip; 200 - error in SD; 300 - client error (incorrect data).
         /// </summary>
         public string ErrorCode { get; set; }
-
-        /// <summary>
-        /// Gets or sets the order status ID.
-        /// </summary>
-        public string Key { get; set; }
-
-        /// <summary>
-        /// Gets or sets the status name.
-        /// </summary>
-        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the status code in the delivery service system.
