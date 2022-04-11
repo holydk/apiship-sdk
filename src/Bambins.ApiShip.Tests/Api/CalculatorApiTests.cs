@@ -4,6 +4,7 @@ using Bambins.ApiShip.Models;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -46,7 +47,7 @@ namespace Bambins.ApiShip.Tests.Api
                 IncludeFees = true,
                 Timeout = 20000,
                 PickupDate = DateTime.Now,
-                To = new CalculatorDirection
+                To = new CalculatorAddress
                 {
                     CountryCode = "RU",
                     Index = "105066",
@@ -57,7 +58,7 @@ namespace Bambins.ApiShip.Tests.Api
                     Lat = 55.755318M,
                     Lng = 37.594265M,
                 },
-                From = new CalculatorDirection
+                From = new CalculatorAddress
                 {
                     CountryCode = "RU",
                     Index = "105066",
@@ -70,7 +71,7 @@ namespace Bambins.ApiShip.Tests.Api
                 },
                 Places = new[]
                 {
-                    new CalculatorPlace
+                    new Sizes
                     {
                         Height = 45,
                         Length = 30,
@@ -81,6 +82,10 @@ namespace Bambins.ApiShip.Tests.Api
                 ProviderKeys = new[]
                 {
                     "dpd", "cdek"
+                },
+                ExtraParams = new Dictionary<string, string>()
+                {
+                    { "dpd.providerConnectId", "0" }
                 }
             });
 

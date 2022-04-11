@@ -1,9 +1,9 @@
 ﻿namespace Bambins.ApiShip.Models
 {
     /// <summary>
-    /// Represents a model for determining the direction of the tariffs calculation.
+    /// Represents a address.
     /// </summary>
-    public class CalculatorDirection
+    public class Address
     {
         #region Properties
 
@@ -28,17 +28,12 @@
         public string CountryCode { get; set; }
 
         /// <summary>
-        /// Gets or sets the postcode
-        /// </summary>
-        public string Index { get; set; }
-
-        /// <summary>
-        /// Gets or sets the latitude. Be sure to indicate if this is a taxi delivery, for example, Yandex.Delivery, Gett, etc.
+        /// Gets or sets the latitude.
         /// </summary>
         public decimal? Lat { get; set; }
 
         /// <summary>
-        /// Gets or sets the longitude. Be sure to indicate if this is a taxi delivery, for example, Yandex.Delivery, Gett, etc.
+        /// Gets or sets the longitude.
         /// </summary>
         public decimal? Lng { get; set; }
 

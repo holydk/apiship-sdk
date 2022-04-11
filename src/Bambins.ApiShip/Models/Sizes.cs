@@ -1,11 +1,9 @@
-﻿using System;
-
-namespace Bambins.ApiShip.Models
+﻿namespace Bambins.ApiShip.Models
 {
     /// <summary>
-    /// Represents the place model for the tariffs calculation.
+    /// Represents the sizes model.
     /// </summary>
-    public class CalculatorPlace
+    public class Sizes
     {
         #region Properties
 

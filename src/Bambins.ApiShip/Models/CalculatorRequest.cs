@@ -38,7 +38,7 @@ namespace Bambins.ApiShip.Models
         /// <summary>
         /// Gets or sets the sender.
         /// </summary>
-        public CalculatorDirection From { get; set; }
+        public CalculatorAddress From { get; set; }
 
         /// <summary>
         /// Gets or sets the value indicating whether to add to the total cost all the fees of the delivery service (insurance and commission for cash on delivery).
@@ -58,7 +58,7 @@ namespace Bambins.ApiShip.Models
         /// <summary>
         /// Gets or sets the places.
         /// </summary>
-        public CalculatorPlace[] Places { get; set; }
+        public Sizes[] Places { get; set; }
 
         /// <summary>
         /// Gets or sets the promo code. In the rate editor, you can specify a promotional code by which you can change rates, for example, a discount on shipping costs.
@@ -83,7 +83,7 @@ namespace Bambins.ApiShip.Models
         /// <summary>
         /// Gets or sets the recipient.
         /// </summary>
-        public CalculatorDirection To { get; set; }
+        public CalculatorAddress To { get; set; }
 
         #endregion Properties
     }
