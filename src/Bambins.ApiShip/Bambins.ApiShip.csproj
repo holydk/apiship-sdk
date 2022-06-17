@@ -3,7 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
 	<PackageId>Bambins.ApiShip</PackageId>
 	<Description>The C# client for interaction with the ApiShip endpoints.</Description>
-	<Version>1.1.0</Version>
+	<Version>1.1.1</Version>
 	<Authors>Dmitry Kiselev</Authors>
 	<PackageTags>aiship;apiship-client;apiship-csharp</PackageTags>
 	<PackageProjectUrl>https://github.com/holydk/apiship-sdk</PackageProjectUrl>
