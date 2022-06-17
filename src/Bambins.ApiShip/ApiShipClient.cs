@@ -113,12 +113,6 @@ namespace Bambins.ApiShip
             _accessToken = accessToken;
             _client = httpClient ?? new HttpClient();
 
-            if (!_client.DefaultRequestHeaders.Contains("UserAgent"))
-                _client.DefaultRequestHeaders.Add("UserAgent", ApiDefaults.DEFAULT_USER_AGENT);
-
-            if (!_client.DefaultRequestHeaders.Contains("Accept"))
-                _client.DefaultRequestHeaders.Add("Accept", "*/*");
-
             apiAccessors = new Dictionary<string, Lazy<ApiAccessor>>
             {
                 { GetApiKey<CalculatorApi>(), CreateApi<CalculatorApi>() },

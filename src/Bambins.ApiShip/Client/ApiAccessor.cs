@@ -107,11 +107,13 @@ namespace Bambins.ApiShip.Client
         /// <returns>The <see cref="Task"/> containing the API response with the response model.</returns>
         protected virtual async Task<ApiResponse<TResponse>> CallAsync<TResponse>(RequestContext context, [CallerMemberName] string callerName = "")
         {
-            var httpResponse = await InternalCallAsync(context, callerName);
-            var model = (TResponse)await DeserializeAsync(httpResponse, typeof(TResponse));
+            using (var httpResponse = await InternalCallAsync(context, callerName))
+            {
+                var model = await DeserializeAsync<TResponse>(httpResponse);
 
-            return new ApiResponse<TResponse>((int)httpResponse.StatusCode, httpResponse.Headers
+                return new ApiResponse<TResponse>((int)httpResponse.StatusCode, httpResponse.Headers
                 .ToDictionary(nameValues => nameValues.Key, nameValues => string.Join(", ", nameValues.Value)), model);
+            }
         }
 
         /// <summary>
@@ -122,31 +124,31 @@ namespace Bambins.ApiShip.Client
         /// <returns>The <see cref="Task"/> containing the API response.</returns>
         protected virtual async Task<ApiResponse> CallAsync(RequestContext context, [CallerMemberName] string callerName = "")
         {
-            var httpResponse = await InternalCallAsync(context, callerName);
-
-            return new ApiResponse((int)httpResponse.StatusCode, httpResponse.Headers
-                .ToDictionary(nameValues => nameValues.Key, nameValues => string.Join(", ", nameValues.Value)));
+            using (var httpResponse = await InternalCallAsync(context, callerName))
+            {
+                return new ApiResponse((int)httpResponse.StatusCode, httpResponse.Headers
+                    .ToDictionary(nameValues => nameValues.Key, nameValues => string.Join(", ", nameValues.Value)));
+            }
         }
 
         /// <summary>
         /// Deserializes the JSON string into a proper object.
         /// </summary>
+        /// <typeparam name="TResponse">The response type.</typeparam>
         /// <param name="response">The HTTP response message.</param>
-        /// <param name="type">The object type.</param>
         /// <returns>The <see cref="Task"/> containing the parsed data.</returns>
-        protected virtual async Task<object> DeserializeAsync(HttpResponseMessage response, Type type)
+        /// <exception cref="ArgumentNullException">Throws, if the response is null.</exception>
+        /// <exception cref="ApiException">Throws, if the deserialization error has occurred.</exception>
+        protected virtual async Task<TResponse> DeserializeAsync<TResponse>(HttpResponseMessage response)
         {
             if (response == null)
                 throw new ArgumentNullException(nameof(response));
-
-            if (type == typeof(byte[]))
-                return await response.Content.ReadAsByteArrayAsync();
 
             var responseContent = await response.Content.ReadAsStringAsync();
 
             try
             {
-                return JsonConvert.DeserializeObject(responseContent, type, _defaultReadSettings);
+                return await Task.Run(() => JsonConvert.DeserializeObject<TResponse>(responseContent, _defaultReadSettings));
             }
             catch (Exception e)
             {
@@ -165,17 +167,81 @@ namespace Bambins.ApiShip.Client
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            var requestUri = string.IsNullOrEmpty(context.Path) ? Path : context.Path;
+            if (Client == null)
+                throw new ApiException(500, $"Cannot resolve the HTTP client.");
+
+            HttpResponseMessage response = null;
+
+            using (var request = CreateHttpRequest(context))
+            {
+                if (context.Body != null)
+                {
+                    var serializedContent = Serialize(context.Body);
+                    request.Content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
+                }
+
+                try
+                {
+                    response = await Client.SendAsync(request);
+                }
+                catch (Exception e)
+                {
+                    throw new ApiException(500, $"Error when calling '{callerName}'. HTTP status code - 500. {e.Message}");
+                }
+
+                int status = (int)response.StatusCode;
+                if (status >= 400)
+                {
+                    var errorMessage = $"Error calling '{callerName}'. HTTP status code - {status}\n";
+
+                    ApiErrorResponse errorResponse = null;
+                    if (response.Content.Headers.ContentType.MediaType.Contains("application/json"))
+                    {
+                        try
+                        {
+                            errorResponse = await DeserializeAsync<ApiErrorResponse>(response);
+                        }
+                        catch (Exception) { }
+                    }
+
+                    var headers = response.Headers
+                        .ToDictionary(nameValues => nameValues.Key, nameValues => string.Join(", ", nameValues.Value));
+
+                    throw new ApiException(status, errorMessage, headers, errorResponse);
+                }
+
+                request.Content?.Dispose();
+            }
+
+            return response;
+        }
+
+        #endregion Methods
+
+        #region Utilities
+
+        private HttpRequestMessage CreateHttpRequest(RequestContext context)
+        {
+            var relativeUri = string.IsNullOrEmpty(context.Path) ? Path : context.Path;
             if (context.Query?.Any() == true)
             {
                 var parsedQuery = HttpUtility.ParseQueryString(string.Empty);
                 foreach (var keyValuePair in context.Query)
                     parsedQuery[keyValuePair.Key] = keyValuePair.Value;
 
-                requestUri += $"?{parsedQuery.ToString()}";
+                relativeUri += $"?{parsedQuery}";
             }
 
-            var request = new HttpRequestMessage(context.Method, requestUri);
+            var baseAddress = Client.BaseAddress == null
+                ? IsSandbox
+                    ? new Uri(ApiDefaults.DEFAULT_SANDBOX_BASE_PATH)
+                    : new Uri(ApiDefaults.DEFAULT_PROD_BASE_PATH)
+                : Client.BaseAddress;
+
+            if (!Uri.TryCreate(baseAddress, relativeUri, out var uri))
+                throw new ApiException(500, $"Cannot create the HTTP request URI.");
+
+            var request = new HttpRequestMessage(context.Method, uri);
 
             if (!string.IsNullOrEmpty(AccessToken))
                 request.Headers.Add("Authorization", AccessToken);
@@ -183,73 +249,15 @@ namespace Bambins.ApiShip.Client
             foreach (var header in context.Headers)
                 request.Headers.Add(header.Key, header.Value);
 
-            if (context.Body != null)
-            {
-                var serializedContent = string.Empty;
-                try
-                {
-                    serializedContent = JsonConvert.SerializeObject(context.Body, _defaultWriteSettings);
-                }
-                catch (Exception e)
-                {
-                    throw new ApiException(500, $"Error when serializing HTTP request body as '{context.Body.GetType()}'. HTTP status code - 500. {e.Message}");
-                }
-
-                request.Content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
-            }
-
-            if (Client == null)
-                throw new ApiException(500, $"Cannot resolve the HTTP client.");
-
-            if (Client.BaseAddress == null)
-            {
-                Client.BaseAddress = IsSandbox
-                    ? new Uri(ApiDefaults.DEFAULT_SANDBOX_BASE_PATH)
-                    : new Uri(ApiDefaults.DEFAULT_PROD_BASE_PATH);
-            }
-
             if (!Client.DefaultRequestHeaders.Contains("UserAgent"))
                 request.Headers.Add("UserAgent", ApiDefaults.DEFAULT_USER_AGENT);
 
             if (!Client.DefaultRequestHeaders.Contains("Accept"))
                 request.Headers.Add("Accept", "*/*");
 
-            HttpResponseMessage response;
-            try
-            {
-                response = await Client.SendAsync(request);
-            }
-            catch (Exception e)
-            {
-                throw new ApiException(500, $"Error when calling '{callerName}'. HTTP status code - 500. {e.Message}");
-            }
-
-            int status = (int)response.StatusCode;
-            if (status >= 400)
-            {
-                var errorMessage = $"Error calling '{callerName}'. HTTP status code - {status}\n";
-
-                ApiErrorResponse errorResponse = null;
-                if (response.Content.Headers.ContentType.MediaType.Contains("application/json"))
-                {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-
-                    try
-                    {
-                        errorResponse = JsonConvert.DeserializeObject<ApiErrorResponse>(responseContent);
-                    }
-                    catch (Exception) { }
-                }
-
-                var headers = response.Headers
-                    .ToDictionary(nameValues => nameValues.Key, nameValues => string.Join(", ", nameValues.Value));
-
-                throw new ApiException(status, errorMessage, headers, errorResponse);
-            }
-
-            return response;
+            return request;
         }
 
-        #endregion Methods
+        #endregion Utilities
     }
 }
