@@ -87,7 +87,7 @@ namespace Bambins.ApiShip.Models
         /// <summary>
         /// Gets or sets the additional options for the service.
         /// </summary>
-        public Dictionary<string, string> Extra { get; set; }
+        public KeyValuePair<string, string>[] Extra { get; set; }
 
         /// <summary>
         /// Gets or sets the presence of a fitting room.
