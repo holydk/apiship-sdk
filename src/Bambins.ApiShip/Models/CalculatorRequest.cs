@@ -26,7 +26,7 @@ namespace Bambins.ApiShip.Models
         public string CustomCode { get; set; }
 
         /// <summary>
-        /// Gets or sets the delivery types.
+        /// Gets or sets the delivery types. If not passed, then tariffs for all types are calculated (Cargo collection by courier, Delivery of cargo to the pickup point).
         /// </summary>
         public int[] DeliveryTypes { get; set; }
 
@@ -51,7 +51,7 @@ namespace Bambins.ApiShip.Models
         public DateTime? PickupDate { get; set; }
 
         /// <summary>
-        /// Gets or sets the pickup types.
+        /// Gets or sets the pickup types. If not passed, then tariffs for all types are calculated (Delivery by Courier, Pickup from the pickup point).
         /// </summary>
         public int[] PickupTypes { get; set; }
 
