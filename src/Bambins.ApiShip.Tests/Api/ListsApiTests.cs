@@ -74,5 +74,14 @@ namespace Bambins.ApiShip.Tests.Api
             response.Payload.Rows.Should().HaveCount(1);
             response.StatusCode.Should().Be(200);
         }
+
+        [Test]
+        public async Task GetTariffsAsync_with_paged_query_should_return_status_code_200()
+        {
+            var response = await _subject.GetTariffsAsync(limit: 1, offset: 1);
+
+            response.Payload.Rows.Should().HaveCount(1);
+            response.StatusCode.Should().Be(200);
+        }
     }
 }

@@ -141,6 +141,33 @@ namespace Bambins.ApiShip.Api
             return CallAsync<PagedEntitiesResponse<OrderStatusDefinition>>(requestContext);
         }
 
+        /// <summary>
+        /// Gets the tariffs.
+        /// </summary>
+        /// <param name="limit">The page limit.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="filter">The filter. Filtering by fields id, providerKey, name is possible.</param>
+        /// <param name="fields">The list of output fields, if not specified, all fields are returned.</param>
+        /// <returns>The <see cref="Task"/> containing the API response with paged <see cref="Tariff"/>.</returns>
+        public virtual Task<ApiResponse<PagedEntitiesResponse<Tariff>>> GetTariffsAsync(int? limit = null, int? offset = null, string filter = "", string fields = "")
+        {
+            var requestContext = new RequestContext("/lists/tariffs");
+
+            if (limit.HasValue)
+                requestContext.WithQuery("limit", limit.Value.ToString());
+
+            if (offset.HasValue)
+                requestContext.WithQuery("offset", offset.Value.ToString());
+
+            if (!string.IsNullOrEmpty(filter))
+                requestContext.WithQuery("filter", filter.ToString());
+
+            if (!string.IsNullOrEmpty(fields))
+                requestContext.WithQuery("fields", fields.ToString());
+
+            return CallAsync<PagedEntitiesResponse<Tariff>>(requestContext);
+        }
+
         #endregion Methods
     }
 }

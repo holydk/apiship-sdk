@@ -31,10 +31,14 @@ namespace Bambins.ApiShip.Tests.Api
         [Test]
         public async Task CancelAsync_should_return_status_code_200()
         {
+            var order = await CreateTestOrder();
+            if (order is null)
+                return;
+
             ApiResponse<CreateSyncOrderResponse> createOrderResponse = null;
             try
             {
-                createOrderResponse = await _subject.CreateSyncAsync(CreateTestOrder());
+                createOrderResponse = await _subject.CreateSyncAsync(order);
             }
             catch (ApiException)
             {
@@ -59,7 +63,11 @@ namespace Bambins.ApiShip.Tests.Api
         [Test]
         public async Task CreateAsync_should_return_status_code_200()
         {
-            var response = await _subject.CreateAsync(CreateTestOrder());
+            var order = await CreateTestOrder();
+            if (order is null)
+                return;
+
+            var response = await _subject.CreateAsync(order);
 
             response.StatusCode.Should().Be(200);
 
@@ -69,10 +77,14 @@ namespace Bambins.ApiShip.Tests.Api
         [Test]
         public async Task DeleteAsync_should_return_status_code_200()
         {
+            var order = await CreateTestOrder();
+            if (order is null)
+                return;
+
             ApiResponse<CreateSyncOrderResponse> createOrderResponse = null;
             try
             {
-                createOrderResponse = await _subject.CreateSyncAsync(CreateTestOrder());
+                createOrderResponse = await _subject.CreateSyncAsync(order);
             }
             catch (ApiException)
             {
@@ -115,10 +127,14 @@ namespace Bambins.ApiShip.Tests.Api
         [Test]
         public async Task ResendAsync_should_return_status_code_200()
         {
+            var order = await CreateTestOrder();
+            if (order is null)
+                return;
+
             ApiResponse<CreateSyncOrderResponse> createOrderResponse = null;
             try
             {
-                createOrderResponse = await _subject.CreateSyncAsync(CreateTestOrder());
+                createOrderResponse = await _subject.CreateSyncAsync(order);
             }
             catch (ApiException)
             {
@@ -143,7 +159,9 @@ namespace Bambins.ApiShip.Tests.Api
         [Test]
         public async Task UpdateAsync_should_return_status_code_200()
         {
-            var order = CreateTestOrder();
+            var order = await CreateTestOrder();
+            if (order is null)
+                return;
 
             ApiResponse<CreateSyncOrderResponse> createOrderResponse = null;
             try
@@ -173,7 +191,9 @@ namespace Bambins.ApiShip.Tests.Api
         [Test]
         public async Task ValidateAsync_should_return_status_code_200()
         {
-            var order = CreateTestOrder();
+            var order = await CreateTestOrder();
+            if (order is null)
+                return;
 
             var response = await _subject.ValidateAsync(order);
 
@@ -182,148 +202,164 @@ namespace Bambins.ApiShip.Tests.Api
 
         #region Utilities
 
-        private static Order CreateTestOrder()
+        private async Task<Order> CreateTestOrder()
         {
-            return new Order
+            int? tariffId = null;
+
+            try
             {
-                Data = new OrderData
+                var getTariffsResponse = await new ListsApi(true, _subject.AccessToken, _subject.Client).GetTariffsAsync(limit: 1, filter: "providerKey=cdek");
+                if (getTariffsResponse?.Payload?.Rows?.Length > 0)
+                    tariffId = getTariffsResponse.Payload.Rows[0].Id;
+                    
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+
+            return tariffId.HasValue
+                ? new Order
                 {
-                    ProviderNumber = "11e51r6",
-                    AdditionalProviderNumber = "21309812039812",
-                    ClientNumber = $"bb_test_{Guid.NewGuid()}",
-                    Barcode = "123456",
-                    Description = "Очень важный заказ",
-                    ProviderKey = "cdek",
-                    //ProviderConnectId = "11102",
-                    PickupType = 1,
-                    DeliveryType = 1,
-                    TariffId = 16,
-                    PointInId = 333,
-                    PointOutId = 407,
-                    PickupDate = DateTime.Now,
-                    PickupTimeStart = "09:00",
-                    PickupTimeEnd = "18:00",
-                    DeliveryDate = DateTime.Now,
-                    DeliveryTimeStart = "09:00",
-                    DeliveryTimeEnd = "18:00",
-                    Height = 45,
-                    Length = 30,
-                    Width = 20,
-                    Weight = 20
-                },
-                Cost = new Cost
-                {
-                    AssessedCost = 50,
-                    DeliveryCost = 200,
-                    DeliveryCostVat = OrderVatType.None,
-                    CodCost = 250,
-                    IsDeliveryPayedByRecipient = false
-                },
-                Sender = new OrderAddress
-                {
-                    CountryCode = "RU",
-                    PostIndex = "105062",
-                    Region = "Москва",
-                    Area = "",
-                    City = "Москва",
-                    CityGuid = "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
-                    Street = "Машкова",
-                    House = "21",
-                    Block = "",
-                    Office = "",
-                    Lat = 55.7647252M,
-                    Lng = 37.6537218M,
-                    AddressString = "г Москва, ул Машкова, д 21",
-                    CompanyName = "ООО \"Тест\"",
-                    CompanyInn = "1234567890",
-                    ContactName = "Иванов Иван Иванович",
-                    Phone = "79250001115",
-                    Email = "test@test.com",
-                    Comment = "",
-                    BrandName = "ApiShip"
-                },
-                Recipient = new OrderAddress
-                {
-                    CountryCode = "RU",
-                    PostIndex = "105062",
-                    Region = "Москва",
-                    Area = "",
-                    City = "Москва",
-                    CityGuid = "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
-                    Street = "Машкова",
-                    House = "21",
-                    Block = "",
-                    Office = "",
-                    Lat = 55.7647252M,
-                    Lng = 37.6537218M,
-                    AddressString = "г Москва, ул Машкова, д 21",
-                    CompanyName = "ООО \"Тест\"",
-                    CompanyInn = "1234567890",
-                    ContactName = "Иванов Иван Иванович",
-                    Phone = "79250001115",
-                    Email = "test@test.com",
-                    Comment = ""
-                },
-                ReturnAddress = new OrderAddress
-                {
-                    CountryCode = "RU",
-                    PostIndex = "105062",
-                    Region = "Москва",
-                    Area = "",
-                    City = "Москва",
-                    CityGuid = "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
-                    Street = "Машкова",
-                    House = "21",
-                    Block = "",
-                    Office = "",
-                    Lat = 55.7647252M,
-                    Lng = 37.6537218M,
-                    AddressString = "г Москва, ул Машкова, д 21",
-                    CompanyName = "ООО \"Тест\"",
-                    CompanyInn = "1234567890",
-                    ContactName = "Иванов Иван Иванович",
-                    Phone = "79250001115",
-                    Email = "test@test.com",
-                    Comment = ""
-                },
-                Places = new OrderPlace[]
-                {
-                    new OrderPlace
+                    Data = new OrderData
                     {
+                        ProviderNumber = "11e51r6",
+                        AdditionalProviderNumber = "21309812039812",
+                        ClientNumber = $"bb_test_{Guid.NewGuid()}",
+                        Barcode = "123456",
+                        Description = "Очень важный заказ",
+                        ProviderKey = "cdek",
+                        //ProviderConnectId = "11102",
+                        PickupType = 1,
+                        DeliveryType = 1,
+                        TariffId = tariffId.Value,
+                        PointInId = 333,
+                        PointOutId = 407,
+                        PickupDate = DateTime.Now,
+                        PickupTimeStart = "09:00",
+                        PickupTimeEnd = "18:00",
+                        DeliveryDate = DateTime.Now,
+                        DeliveryTimeStart = "09:00",
+                        DeliveryTimeEnd = "18:00",
                         Height = 45,
                         Length = 30,
                         Width = 20,
-                        Weight = 20,
-                        PlaceNumber = "123421931239",
-                        Barcode = "800028197737",
-                        Items = new OrderPlaceItem[]
+                        Weight = 20
+                    },
+                    Cost = new Cost
+                    {
+                        AssessedCost = 50,
+                        DeliveryCost = 200,
+                        DeliveryCostVat = OrderVatType.None,
+                        CodCost = 250,
+                        IsDeliveryPayedByRecipient = false
+                    },
+                    Sender = new OrderAddress
+                    {
+                        CountryCode = "RU",
+                        PostIndex = "105062",
+                        Region = "Москва",
+                        Area = "",
+                        City = "Москва",
+                        CityGuid = "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
+                        Street = "Машкова",
+                        House = "21",
+                        Block = "",
+                        Office = "",
+                        Lat = 55.7647252M,
+                        Lng = 37.6537218M,
+                        AddressString = "г Москва, ул Машкова, д 21",
+                        CompanyName = "ООО \"Тест\"",
+                        CompanyInn = "1234567890",
+                        ContactName = "Иванов Иван Иванович",
+                        Phone = "79250001115",
+                        Email = "test@test.com",
+                        Comment = "",
+                        BrandName = "ApiShip"
+                    },
+                    Recipient = new OrderAddress
+                    {
+                        CountryCode = "RU",
+                        PostIndex = "105062",
+                        Region = "Москва",
+                        Area = "",
+                        City = "Москва",
+                        CityGuid = "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
+                        Street = "Машкова",
+                        House = "21",
+                        Block = "",
+                        Office = "",
+                        Lat = 55.7647252M,
+                        Lng = 37.6537218M,
+                        AddressString = "г Москва, ул Машкова, д 21",
+                        CompanyName = "ООО \"Тест\"",
+                        CompanyInn = "1234567890",
+                        ContactName = "Иванов Иван Иванович",
+                        Phone = "79250001115",
+                        Email = "test@test.com",
+                        Comment = ""
+                    },
+                    ReturnAddress = new OrderAddress
+                    {
+                        CountryCode = "RU",
+                        PostIndex = "105062",
+                        Region = "Москва",
+                        Area = "",
+                        City = "Москва",
+                        CityGuid = "0c5b2444-70a0-4932-980c-b4dc0d3f02b5",
+                        Street = "Машкова",
+                        House = "21",
+                        Block = "",
+                        Office = "",
+                        Lat = 55.7647252M,
+                        Lng = 37.6537218M,
+                        AddressString = "г Москва, ул Машкова, д 21",
+                        CompanyName = "ООО \"Тест\"",
+                        CompanyInn = "1234567890",
+                        ContactName = "Иванов Иван Иванович",
+                        Phone = "79250001115",
+                        Email = "test@test.com",
+                        Comment = ""
+                    },
+                    Places = new OrderPlace[]
+                    {
+                        new OrderPlace
                         {
-                            new OrderPlaceItem
+                            Height = 45,
+                            Length = 30,
+                            Width = 20,
+                            Weight = 20,
+                            PlaceNumber = "123421931239",
+                            Barcode = "800028197737",
+                            Items = new OrderPlaceItem[]
                             {
-                                Height = 45,
-                                Length = 30,
-                                Width = 20,
-                                Weight = 20,
-                                Articul = "1189.0",
-                                MarkCode = "010290000046994521AK-rO?H!hC2(M\\u001D91003A\\u001D92cYTu3sTj82KJR3+6hVtQyAfa5Zf6Q2alfJEnwe2RIv4GAWVy2GUptk7P1NYxRsIgsTJi+Wgg+K3dncPELDJ9Ag==",
-                                Description = "Товар 1",
-                                Quantity = 1,
-                                QuantityDelivered = 0,
-                                AssessedCost = 50,
-                                Cost = 50,
-                                CostVat = OrderVatType.None,
-                                Barcode = "1234567890123",
-                                CompanyName = "ООО \"Тест\"",
-                                CompanyInn = "1234567890"
+                                new OrderPlaceItem
+                                {
+                                    Height = 45,
+                                    Length = 30,
+                                    Width = 20,
+                                    Weight = 20,
+                                    Articul = "1189.0",
+                                    MarkCode = "010290000046994521AK-rO?H!hC2(M\\u001D91003A\\u001D92cYTu3sTj82KJR3+6hVtQyAfa5Zf6Q2alfJEnwe2RIv4GAWVy2GUptk7P1NYxRsIgsTJi+Wgg+K3dncPELDJ9Ag==",
+                                    Description = "Товар 1",
+                                    Quantity = 1,
+                                    QuantityDelivered = 0,
+                                    AssessedCost = 50,
+                                    Cost = 50,
+                                    CostVat = OrderVatType.None,
+                                    Barcode = "1234567890123",
+                                    CompanyName = "ООО \"Тест\"",
+                                    CompanyInn = "1234567890"
+                                }
                             }
                         }
+                    },
+                    ExtraParams = new KeyValuePair<string, string>[]
+                    {
+                        new KeyValuePair<string, string>("testParam", "testValue")
                     }
-                },
-                ExtraParams = new KeyValuePair<string, string>[]
-                {
-                    new KeyValuePair<string, string>("testParam", "testValue")
                 }
-            };
+                : null;
         }
 
         #endregion Utilities

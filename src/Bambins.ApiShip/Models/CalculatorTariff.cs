@@ -1,7 +1,7 @@
 ﻿namespace Bambins.ApiShip.Models
 {
     /// <summary>
-    /// Represents a tariff model.
+    /// Represents a calculator tariff model.
     /// </summary>
     public class CalculatorTariff
     {
