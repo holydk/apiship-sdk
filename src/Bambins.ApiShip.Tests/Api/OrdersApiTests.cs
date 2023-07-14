@@ -1,4 +1,4 @@
-﻿using Bambins.ApiShip.Api;
+using Bambins.ApiShip.Api;
 using Bambins.ApiShip.Client;
 using Bambins.ApiShip.Models;
 using FluentAssertions;
@@ -29,7 +29,7 @@ namespace Bambins.ApiShip.Tests.Api
         }
 
         [Test]
-        public async Task CancelAsync_should_return_status_code_200()
+        public async Task GetAsync_should_return_status_code_200()
         {
             var order = await CreateTestOrder();
             if (order is null)
@@ -225,7 +225,7 @@ namespace Bambins.ApiShip.Tests.Api
                     {
                         ProviderNumber = "11e51r6",
                         AdditionalProviderNumber = "21309812039812",
-                        ClientNumber = $"bb_test_{Guid.NewGuid()}",
+                        ClientNumber = $"bb_test_{new Random((int)DateTime.UtcNow.Ticks).Next(100, int.MaxValue)}",
                         Barcode = "123456",
                         Description = "Очень важный заказ",
                         ProviderKey = "cdek",
