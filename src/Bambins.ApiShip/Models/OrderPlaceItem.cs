@@ -13,7 +13,7 @@
         public string Articul { get; set; }
 
         /// <summary>
-        /// Gets or sets the estimated cost of a unit of goods in rubles.
+        /// Gets or sets the estimated cost of a unit of goods (in rubles).
         /// </summary>
         public decimal? AssessedCost { get; set; }
 
@@ -33,7 +33,7 @@
         public string CompanyName { get; set; }
 
         /// <summary>
-        /// Gets or sets the cost of a unit of goods, including VAT, in rubles
+        /// Gets or sets the cash on delivery amount, including VAT (in rubles).
         /// </summary>
         public decimal? Cost { get; set; }
 
@@ -53,7 +53,7 @@
         public string MarkCode { get; set; }
 
         /// <summary>
-        /// Gets or sets the quantity of goods. If markCode is specified, count cannot be > 1.
+        /// Gets or sets the quantity of goods. If <see cref="MarkCode"/> is specified, count cannot be > 1.
         /// </summary>
         public int? Quantity { get; set; }
 
