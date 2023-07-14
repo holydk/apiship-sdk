@@ -18,7 +18,7 @@
         public decimal? CodCost { get; set; }
 
         /// <summary>
-        /// Gets or sets the delivery cost including VAT (in rubles).
+        /// Gets or sets the shipping cost from the recipient including VAT (in rubles). <see cref="CodCost"/> must contain this amount.
         /// </summary>
         public decimal? DeliveryCost { get; set; }
 
