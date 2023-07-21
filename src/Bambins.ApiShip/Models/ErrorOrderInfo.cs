@@ -15,7 +15,7 @@
         /// <summary>
         /// Gets or sets the order ID.
         /// </summary>
-        public string OrderId { get; set; }
+        public int OrderId { get; set; }
 
         #endregion Properties
     }

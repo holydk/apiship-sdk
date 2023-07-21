@@ -25,7 +25,7 @@
         /// <summary>
         /// Gets or sets the order ID.
         /// </summary>
-        public string OrderId { get; set; }
+        public int OrderId { get; set; }
 
         /// <summary>
         /// Gets or sets the delivery service code.
