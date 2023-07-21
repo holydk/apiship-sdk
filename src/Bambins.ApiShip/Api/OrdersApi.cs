@@ -96,6 +96,20 @@ namespace Bambins.ApiShip.Api
         }
 
         /// <summary>
+        /// Gets the labels.
+        /// </summary>
+        /// <param name="request">The request model to get the lables.</param>
+        /// <returns>The <see cref="Task"/> containing the API response with <see cref="GetLabelsResponse"/>.</returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="request"/> is null.</exception>
+        public virtual Task<ApiResponse<GetLabelsResponse>> GetLabels(GetLabelsRequest request)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            return CallAsync<GetLabelsResponse>(new RequestContext($"/orders/labels", HttpMethod.Post).WithBody(request));
+        }
+
+        /// <summary>
         /// Gets the order status by ID.
         /// </summary>
         /// <param name="orderId">The ID to get the order status.</param>
