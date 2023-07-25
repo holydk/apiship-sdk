@@ -29,38 +29,6 @@ namespace Bambins.ApiShip.Tests.Api
         }
 
         [Test]
-        public async Task GetAsync_should_return_status_code_200()
-        {
-            var order = await CreateTestOrder();
-            if (order is null)
-                return;
-
-            ApiResponse<CreateSyncOrderResponse> createOrderResponse = null;
-            try
-            {
-                createOrderResponse = await _subject.CreateSyncAsync(order);
-            }
-            catch (ApiException)
-            {
-            }
-
-            if (createOrderResponse is not null)
-            {
-                var getOrderResponse = await _subject.GetAsync(createOrderResponse.Payload.OrderId);
-
-                getOrderResponse.StatusCode.Should().Be(200);
-
-                try
-                {
-                    await _subject.DeleteAsync(createOrderResponse.Payload.OrderId);
-                }
-                catch (ApiException)
-                {
-                }
-            }
-        }
-
-        [Test]
         public async Task CreateAsync_should_return_status_code_200()
         {
             var order = await CreateTestOrder();
@@ -99,6 +67,38 @@ namespace Bambins.ApiShip.Tests.Api
         }
 
         [Test]
+        public async Task GetAsync_should_return_status_code_200()
+        {
+            var order = await CreateTestOrder();
+            if (order is null)
+                return;
+
+            ApiResponse<CreateSyncOrderResponse> createOrderResponse = null;
+            try
+            {
+                createOrderResponse = await _subject.CreateSyncAsync(order);
+            }
+            catch (ApiException)
+            {
+            }
+
+            if (createOrderResponse is not null)
+            {
+                var getOrderResponse = await _subject.GetAsync(createOrderResponse.Payload.OrderId);
+
+                getOrderResponse.StatusCode.Should().Be(200);
+
+                try
+                {
+                    await _subject.DeleteAsync(createOrderResponse.Payload.OrderId);
+                }
+                catch (ApiException)
+                {
+                }
+            }
+        }
+
+        [Test]
         public async Task GetStatusAsync_with_customer_number_should_throw_api_exception_with_status_code_404()
         {
             Func<Task> getAccessToken = () => _subject.GetStatusAsync("foo");
@@ -119,7 +119,15 @@ namespace Bambins.ApiShip.Tests.Api
         [Test]
         public async Task GetStatusesAsync_should_return_status_code_200()
         {
-            var response = await _subject.GetStatusesAsync(new OrderStatusesRequest { OrderIds = new[] { 1 } });
+            var response = await _subject.GetStatusesAsync(new OrderStatusesRequest { OrderIds = new[] { 59331 } });
+
+            response.StatusCode.Should().Be(200);
+        }
+
+        [Test]
+        public async Task GetStatusHistoryAsync_should_return_status_code_200()
+        {
+            var response = await _subject.GetStatusHistoryAsync(59331);
 
             response.StatusCode.Should().Be(200);
         }
@@ -211,7 +219,6 @@ namespace Bambins.ApiShip.Tests.Api
                 var getTariffsResponse = await new ListsApi(true, _subject.AccessToken, _subject.Client).GetTariffsAsync(limit: 1, filter: "providerKey=cdek");
                 if (getTariffsResponse?.Payload?.Rows?.Length > 0)
                     tariffId = getTariffsResponse.Payload.Rows[0].Id;
-                    
             }
             catch (ApiException)
             {

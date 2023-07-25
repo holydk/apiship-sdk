@@ -17,7 +17,7 @@ namespace Bambins.ApiShip.Models
         /// <summary>
         /// Gets or sets the date the status was created in the delivery service system.
         /// </summary>
-        public string CreatedProvider { get; set; }
+        public DateTime? CreatedProvider { get; set; }
 
         /// <summary>
         /// Gets or sets the Error code. Example: 100 - error in ApiShip; 200 - error in SD; 300 - client error (incorrect data).

@@ -149,6 +149,19 @@ namespace Bambins.ApiShip.Api
         }
 
         /// <summary>
+        /// Gets the order status history by ID.
+        /// </summary>
+        /// <param name="orderId">The ID to get the order status history.</param>
+        /// <returns>The <see cref="Task"/> containing the API response with <see cref="OrderStatusHistory"/>.</returns>
+        public virtual Task<ApiResponse<OrderStatusHistory>> GetStatusHistoryAsync(int orderId)
+        {
+            if (orderId <= 0)
+                throw new InvalidOperationException($"{nameof(orderId)} should be greater than 0.");
+
+            return CallAsync<OrderStatusHistory>(new RequestContext($"/orders/{orderId}/statusHistory"));
+        }
+
+        /// <summary>
         /// Resends the order to the delivery service.
         /// </summary>
         /// <param name="orderId">The ID to resend order.</param>
